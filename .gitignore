@@ -1,0 +1,5 @@
+DryPipe
+Snakemake2Drypipe
+*.gz
+.idea
+*.pyc

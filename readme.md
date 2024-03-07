@@ -14,6 +14,10 @@ git clone git@github.com:calculs-ca/BioTracer.git
 
 ```bash 
 git clone git@github.com:calculs-ca/DryPipe.git
+
+git fetch wip-dsl-overhaul
+git checkout wip-dsl-overhaul
+
 ```
 
 ### 4. create conda env
@@ -55,6 +59,16 @@ To run a given pipeline, create a dir for the pipeline instance <PIPELINE_INSTAN
 source BioTracer/env.sh <PIPELINE_INSTANCE_DIR>
 ```
 
+### Prepare pipeline instance:
+
+copy fastas into the pipeline instance directory: 
+
+```bash 
+cp *.fasta.gz <PIPELINE_INSTANCE_DIR>
+
+```
+
+
 ### Run
 
 ```bash 
@@ -62,7 +76,7 @@ source BioTracer/env.sh <PIPELINE_INSTANCE_DIR>
 python3 -m dry_pipe.cli run --generator=bio_tracer:pipeline
 ```
 
-### Prepare
+### Prepare Tasks
 
 will create tasks, without executing
 
@@ -72,9 +86,13 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 
 ```
 
-### Execute single task, in foreground
+### Execute single task, --wait --tail
+
++ option "--wait" launches in the foreground, 
++ option "--tail" tails the task logs:  out.log (stdout and stderr), and pipeline.log
 
 ```bash 
 
-python3 -m dry_pipe.cli task $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait
+python3 -m dry_pipe.cli task $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail
+
 ```

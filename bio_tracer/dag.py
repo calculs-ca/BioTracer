@@ -158,18 +158,20 @@ def dag_gen(dsl):
             score_threshold=1,
             genome_features=dsl.file(genome_features),
             mappable_features=dsl.file(mappable_features),
-            basename=sample_pair_name
+            sam2site_basename=f"{sample_pair_name}.q30_stranded"
         ).outputs(
             mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
             flagstat=dsl.file(f"{sample_pair_name}_flagstat.txt"),
             q30_sam=dsl.file(f"{sample_pair_name}.q30.sam"),
-            q30_stranded_bg=dsl.file(f"{sample_pair_name}.q30_stranded.bg"),
+            q30_stranded_bed=dsl.file(f"{sample_pair_name}.q30_stranded.bed"),
             intersect_bed=dsl.file(f"{sample_pair_name}_allfeat_intersect.bed"),
-            mappable_intersect_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed")
+            mappable_intersect_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
+            cds_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
+            genes_insertions_tsv=dsl.file(f"{sample_pair_name}_genes_insertions.tsv")
         ).calls("""
             #!/usr/bin/bash
 
-            set -xe
+            set -e
             
             export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
             module use $MUGQIC_INSTALL_HOME/modulefiles            
@@ -196,10 +198,10 @@ def dag_gen(dsl):
             module add mugqic/bedtools/2.30
             
             # intersect
-            bedtools intersect -a $genome_features -b $q30_stranded_bg -wo > $intersect_bed
+            bedtools intersect -a $genome_features -b $q30_stranded_bed -wo > $intersect_bed
             
             # mappability
-            bedtools intersect -a $mappable_features -b $q30_stranded_bg -wo > $mappable_intersect_bed"
+            bedtools intersect -a $mappable_features -b $q30_stranded_bed -wo > $mappable_intersect_bed
             """
         ).calls(
             sites2genes

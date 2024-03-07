@@ -269,7 +269,7 @@ def sam2sites(
     read_len_threshold,
     score_threshold,
     __task_output_dir,
-    basename
+    sam2site_basename
 ):
     input_filename = q30_sam
 
@@ -284,16 +284,16 @@ def sam2sites(
     )
 
     if create_bedfile:
-        build_bed_file(interval_df, f"{__task_output_dir}/{basename}.bed")
+        build_bed_file(interval_df, f"{__task_output_dir}/{sam2site_basename}.bed")
     if create_scored_bedfile:
-        build_scored_bed_file(interval_df, f"{__task_output_dir}/{basename}_scored.bed")
+        build_scored_bed_file(interval_df, f"{__task_output_dir}/{sam2site_basename}_scored.bed")
     if create_stranded_bedgraph:
         build_stranded_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{basename}_stranded.bg")
+            interval_df, f"{__task_output_dir}/{sam2site_basename}_stranded.bg")
     if create_unstranded_bedgraph:
         build_unstranded_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{basename}_unstranded.bg")
+            interval_df, f"{__task_output_dir}/{sam2site_basename}_unstranded.bg")
     if create_stranded_unnormalized_bedgraph:
         build_stranded_unnormalized_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{basename}_stranded_unnormalized.bg"
+            interval_df, f"{__task_output_dir}/{sam2site_basename}_stranded_unnormalized.bg"
         )

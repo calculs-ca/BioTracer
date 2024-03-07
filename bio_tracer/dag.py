@@ -135,7 +135,7 @@ def dag_gen(dsl):
                 -w 24 \\
                 -i $read1 -o $fastp_out1 \\
                 -I $read2 -O $fastp_out2 \\
-                -j $fastp_json_out -h $fastp_html_out \\ 
+                -j $fastp_json_out -h $fastp_html_out \\
                 --failed_out $fail_out \\
                 --unpaired1 $unpaired_1_out --unpaired2 $unpaired_2_out
         """)()

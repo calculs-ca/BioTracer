@@ -15,9 +15,9 @@ git clone git@github.com:calculs-ca/BioTracer.git
 ```bash 
 git clone git@github.com:calculs-ca/DryPipe.git
 
-git fetch wip-dsl-overhaul
+cd DryPipe
+git fetch origin wip-dsl-overhaul
 git checkout wip-dsl-overhaul
-
 ```
 
 ### 4. create conda env
@@ -92,6 +92,7 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 + option "--tail" tails the task logs:  out.log (stdout and stderr), and pipeline.log
 
 ```bash 
+
 
 python3 -m dry_pipe.cli task $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail
 

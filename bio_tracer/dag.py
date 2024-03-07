@@ -128,16 +128,15 @@ def dag_gen(dsl):
             module use $MUGQIC_INSTALL_HOME/modulefiles
             module add mugqic/fastp/0.23.2
             
-            fastp --disable_adapter_trimming \\ 
-                --cut_right \\ 
-                --cut_right_window_size 4 \\  
-                --cut_mean_quality 20 \\ 
-                --length_required 10 \\ 
-                -w 24 \\ 
-                -i $read1 -o $fastp_out1 \\ 
+            fastp --disable_adapter_trimming --cut_right \\
+                --cut_right_window_size 4 \\
+                --cut_mean_quality 20 \\
+                --length_required 10 \\
+                -w 24 \\
+                -i $read1 -o $fastp_out1 \\
                 -I $read2 -O $fastp_out2 \\
-                -j $fastp_json_out -h $fastp_html_out \\ 
-                --failed_out $fail_out \\  
+                -j $fastp_json_out -h $fastp_html_out \\
+                --failed_out $fail_out \\
                 --unpaired1 $unpaired_1_out --unpaired2 $unpaired_2_out
         """)()
 
@@ -154,11 +153,12 @@ def dag_gen(dsl):
             genome_fasta=index_genome_task.outputs.local_genome_fasta,
             r1=fastp_task.outputs.fastp_out1,
             r2=fastp_task.outputs.fastp_out2,
-            norm_value=10000000,
+            normalization_value=10000000,
             read_len_threshold=20,
             score_threshold=1,
             genome_features=dsl.file(genome_features),
-            mappable_features=dsl.file(mappable_features)
+            mappable_features=dsl.file(mappable_features),
+            basename=sample_pair_name
         ).outputs(
             mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
             flagstat=dsl.file(f"{sample_pair_name}_flagstat.txt"),

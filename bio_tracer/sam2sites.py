@@ -1,3 +1,4 @@
+import os.path
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -263,16 +264,16 @@ create_bedfile = True
 
 @DryPipe.python_call()
 def sam2sites(
-    input_filename,
+    q30_sam,
     normalization_value,
     read_len_threshold,
     score_threshold,
-    __task_output_dir
+    __task_output_dir,
+    basename
 ):
+    input_filename = q30_sam
 
     create_stranded_unnormalized_bedgraph = True
-    
-    basename = Path(input_filename.name).basename().stripext()
 
     sam_df = parse_sam_file(input_filename, read_len_threshold)
     site_df = sam_to_site(sam_df)

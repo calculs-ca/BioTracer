@@ -128,15 +128,15 @@ def dag_gen(dsl):
             module use $MUGQIC_INSTALL_HOME/modulefiles
             module add mugqic/fastp/0.23.2
             
-            fastp --disable_adapter_trimming --cut_right \\ 
-                --cut_right_window_size 4 \\  
-                --cut_mean_quality 20 \\ 
-                --length_required 10 \\ 
-                -w 24 \\ 
+            fastp --disable_adapter_trimming --cut_right \\
+                --cut_right_window_size 4 \\
+                --cut_mean_quality 20 \\
+                --length_required 10 \\
+                -w 24 \\
                 -i $read1 -o $fastp_out1 \\ 
                 -I $read2 -O $fastp_out2 \\
                 -j $fastp_json_out -h $fastp_html_out \\ 
-                --failed_out $fail_out \\  
+                --failed_out $fail_out \\
                 --unpaired1 $unpaired_1_out --unpaired2 $unpaired_2_out
         """)()
 

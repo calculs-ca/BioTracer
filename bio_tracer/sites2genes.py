@@ -6,10 +6,10 @@ length_pc_stop = 85.0
 
 
 @DryPipe.python_call()
-def sites2genes(cds_bed, intersect_bed, genes_insertions_tsv):
+def sites2genes(mappable_features, intersect_bed, genes_insertions_tsv):
     # Read files
     gene_df = pd.read_csv(
-        cds_bed,
+        mappable_features,
         dtype={
             "chr_name": str,
             "start": "Int64",
@@ -89,3 +89,5 @@ def sites2genes(cds_bed, intersect_bed, genes_insertions_tsv):
     ].to_csv(
         genes_insertions_tsv, header=True, index=False, sep="\t"
     )
+
+

@@ -242,7 +242,7 @@ def dag_gen(dsl):
             
             set -xe            
             
-            multiqc -o multiQC $__pipeline_instance_dir/output/fastp.*/*.zip $__pipeline_instance_dir/output/fastp.*/*.json $__pipeline_instance_dir/output/map_reads.*/*flagstat.*
+            multiqc -o $__task_output_dir $__pipeline_instance_dir/output/fastp.*/*.zip $__pipeline_instance_dir/output/fastp.*/*.json $__pipeline_instance_dir/output/map_reads.*/*flagstat.*
             
             # multiqc breaks python3, causes a DryPipe bug
             module unload mugqic/MultiQC/1.14                

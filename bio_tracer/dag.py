@@ -214,6 +214,17 @@ def dag_gen(dsl):
             """
         ).calls(
             sites2genes
+        ).calls(
+            """
+            #!/usr/bin/bash            
+            set -e 
+            export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+            module use $MUGQIC_INSTALL_HOME/modulefiles                                            
+            module add mugqic/R_Bioconductor/4.1.0_3.13
+                                    
+                                        
+            Rscript $__pipeline_code_dir/tradis_essentiality_wscore.R $genes_insertions_tsv                        
+            """
         )()
 
         yield map_reads_task
@@ -223,17 +234,18 @@ def dag_gen(dsl):
             key="multiqc"
         ).calls("""
             #!/usr/bin/bash
-            set -xe
+            set -e
             
             export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
             module use $MUGQIC_INSTALL_HOME/modulefiles                                
             module add mugqic/MultiQC/1.14
             
-            multiqc \\
-                $__pipeline_instance_dir/output/fastqc.*/*.zip \\
-                $__pipeline_instance_dir/output/fastp.*/* \\                    
-                $__pipeline_instance_dir/flagstat.*/* \\
-                -o multiQC                        
+            set -xe            
+            
+            multiqc -o multiQC $__pipeline_instance_dir/output/fastp.*/*.zip $__pipeline_instance_dir/output/fastp.*/*.json $__pipeline_instance_dir/output/map_reads.*/*flagstat.*
+            
+            # multiqc breaks python3, causes a DryPipe bug
+            module unload mugqic/MultiQC/1.14                
         """)()
 
 

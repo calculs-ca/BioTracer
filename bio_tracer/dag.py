@@ -221,9 +221,11 @@ def dag_gen(dsl):
             export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
             module use $MUGQIC_INSTALL_HOME/modulefiles                                            
             module add mugqic/R_Bioconductor/4.1.0_3.13
-                                    
-                                        
-            Rscript $__pipeline_code_dir/tradis_essentiality_wscore.R $genes_insertions_tsv                        
+
+            cmd="Rscript $__pipeline_code_dir/tradis_essentiality_wscore.R $genes_insertions_tsv"
+            echo  $cmd                                       
+            $cmd      
+                              
             """
         )()
 

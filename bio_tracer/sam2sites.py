@@ -1,8 +1,7 @@
-import os.path
-from pathlib import Path
 import numpy as np
 import pandas as pd
 from dry_pipe import DryPipe
+
 pd.options.mode.chained_assignment = None
 
 
@@ -257,43 +256,35 @@ def build_scored_bed_file(interval_df: pd.DataFrame, filename):
         filename, header=False, index=False, sep="\t"
     )
 
-create_scored_bedfile = True
-create_stranded_bedgraph = True
-create_unstranded_bedgraph = True
-create_bedfile = True
-
 @DryPipe.python_call()
 def sam2sites(
     q30_sam,
     normalization_value,
     read_len_threshold,
     score_threshold,
-    __task_output_dir,
-    sam2site_basename
+    same2sites_bed,
+    same2sites_scored_bed,
+    same2sites_stranded_bedgraph,
+    same2sites_unstranded_bedgraph,
+    same2sites_stranded_unnormalized_bedgraph
 ):
     input_filename = q30_sam
 
-    create_stranded_unnormalized_bedgraph = True
-
     sam_df = parse_sam_file(input_filename, read_len_threshold)
     site_df = sam_to_site(sam_df)
+
     interval_df = site_to_interval(
         site_df,
         normalization_value=normalization_value,
         score_threshold=score_threshold,
     )
 
-    if create_bedfile:
-        build_bed_file(interval_df, f"{__task_output_dir}/{sam2site_basename}.bed")
-    if create_scored_bedfile:
-        build_scored_bed_file(interval_df, f"{__task_output_dir}/{sam2site_basename}_scored.bed")
-    if create_stranded_bedgraph:
-        build_stranded_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{sam2site_basename}_stranded.bg")
-    if create_unstranded_bedgraph:
-        build_unstranded_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{sam2site_basename}_unstranded.bg")
-    if create_stranded_unnormalized_bedgraph:
-        build_stranded_unnormalized_bedgraph_file(
-            interval_df, f"{__task_output_dir}/{sam2site_basename}_stranded_unnormalized.bg"
-        )
+    build_bed_file(interval_df, same2sites_bed)
+
+    build_scored_bed_file(interval_df, same2sites_scored_bed)
+
+    build_stranded_bedgraph_file(interval_df, same2sites_stranded_bedgraph)
+
+    build_unstranded_bedgraph_file(interval_df, same2sites_unstranded_bedgraph)
+
+    build_stranded_unnormalized_bedgraph_file(interval_df, same2sites_stranded_unnormalized_bedgraph)

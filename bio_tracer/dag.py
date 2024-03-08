@@ -158,12 +158,19 @@ def dag_gen(dsl):
             score_threshold=1,
             genome_features=dsl.file(genome_features),
             mappable_features=dsl.file(mappable_features),
-            sam2site_basename=f"{sample_pair_name}.q30_stranded"
+            sam2site_basename=f"{sample_pair_name}.q30"
         ).outputs(
             mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
             flagstat=dsl.file(f"{sample_pair_name}_flagstat.txt"),
             q30_sam=dsl.file(f"{sample_pair_name}.q30.sam"),
-            q30_stranded_bed=dsl.file(f"{sample_pair_name}.q30_stranded.bed"),
+
+            # same2sites.py
+            same2sites_bed=dsl.file(f"{sample_pair_name}.bed"),
+            same2sites_scored_bed=dsl.file(f"{sample_pair_name}_scored.bed"),
+            same2sites_stranded_bedgraph=dsl.file(f"{sample_pair_name}_stranded.bg"),
+            same2sites_unstranded_bedgraph=dsl.file(f"{sample_pair_name}_unstranded.bg"),
+            same2sites_stranded_unnormalized_bedgraph=dsl.file(f"{sample_pair_name}_stranded_unnormalized.bg"),
+
             intersect_bed=dsl.file(f"{sample_pair_name}_allfeat_intersect.bed"),
             mappable_intersect_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
             cds_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
@@ -191,17 +198,19 @@ def dag_gen(dsl):
         ).calls(
             """
             #!/usr/bin/bash
-            set -xe
+            set -e
             
             export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
             module use $MUGQIC_INSTALL_HOME/modulefiles                                            
             module add mugqic/bedtools/2.30
             
+            set -xe
+            
             # intersect
-            bedtools intersect -a $genome_features -b $q30_stranded_bed -wo > $intersect_bed
+            bedtools intersect -a $genome_features -b $same2sites_stranded_bedgraph -wo > $intersect_bed
             
             # mappability
-            bedtools intersect -a $mappable_features -b $q30_stranded_bed -wo > $mappable_intersect_bed
+            bedtools intersect -a $mappable_features -b $same2sites_stranded_bedgraph -wo > $mappable_intersect_bed
             """
         ).calls(
             sites2genes

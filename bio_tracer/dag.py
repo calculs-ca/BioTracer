@@ -242,7 +242,7 @@ def dag_gen(dsl):
         ).calls(
             """
             #!/usr/bin/bash
-            echo "t1"            
+                        
             set -e 
             export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
             module use $MUGQIC_INSTALL_HOME/modulefiles                                            

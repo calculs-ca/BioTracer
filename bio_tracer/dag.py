@@ -119,12 +119,24 @@ def dag_gen(dsl):
 
         sample_pair_name = os.path.basename(sample_pair_name)
 
-        fastp_task = dsl.task(
-            key=f"fastp.{sample_pair_name}"
+        yield dsl.task(
+            key=f"fastq2essentiality.{sample_pair_name}"
         ).inputs(
+            index_genome_task.outputs.i1,
+            index_genome_task.outputs.i2,
+            index_genome_task.outputs.i3,
+            index_genome_task.outputs.i4,
+            index_genome_task.outputs.i5,
             read1=dsl.file(read_fastq_1),
             read2=dsl.file(read_fastq_2),
-            adapter_seq=conf.adapter_seq
+            adapter_seq=conf.adapter_seq,
+            genome_fasta=index_genome_task.outputs.local_genome_fasta,
+            normalization_value=conf.norm_value,
+            read_len_threshold=conf.read_len_threshold,
+            score_threshold=conf.score_threshold,
+            genome_features=dsl.file(conf.genome_features),
+            mappable_features=dsl.file(conf.mappability),
+            sam2site_basename=f"{sample_pair_name}.q30"
         ).outputs(
             fast_qc=dsl.file(f"{sample_pair_name}.fast_qc.zip"),
             cutadapt_r1=dsl.file(f"{sample_pair_name}_R1_cutadapt.fq"),
@@ -135,7 +147,24 @@ def dag_gen(dsl):
             fastp_html_out=dsl.file(f"{sample_pair_name}.fastp.html"),
             fail_out=dsl.file(f"{sample_pair_name}.failed"),
             unpaired_1_out=dsl.file(f"{sample_pair_name}_R1.unpaired"),
-            unpaired_2_out=dsl.file(f"{sample_pair_name}_R2.unpaired")
+            unpaired_2_out=dsl.file(f"{sample_pair_name}_R2.unpaired"),
+
+
+            mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
+            flagstat=dsl.file(f"{sample_pair_name}_flagstat.txt"),
+            q30_sam=dsl.file(f"{sample_pair_name}.q30.sam"),
+
+            # same2sites.py
+            same2sites_bed=dsl.file(f"{sample_pair_name}.bed"),
+            same2sites_scored_bed=dsl.file(f"{sample_pair_name}_scored.bed"),
+            same2sites_stranded_bedgraph=dsl.file(f"{sample_pair_name}_stranded.bg"),
+            same2sites_unstranded_bedgraph=dsl.file(f"{sample_pair_name}_unstranded.bg"),
+            same2sites_stranded_unnormalized_bedgraph=dsl.file(f"{sample_pair_name}_stranded_unnormalized.bg"),
+
+            intersect_bed=dsl.file(f"{sample_pair_name}_allfeat_intersect.bed"),
+            mappable_intersect_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
+            cds_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
+            genes_insertions_tsv=dsl.file(f"{sample_pair_name}_genes_insertions.tsv")
         ).calls("""
             #!/usr/bin/bash
             set -xe                 
@@ -171,44 +200,7 @@ def dag_gen(dsl):
                 -j $fastp_json_out -h $fastp_html_out \\
                 --failed_out $fail_out \\
                 --unpaired1 $unpaired_1_out --unpaired2 $unpaired_2_out
-        """)()
-
-        yield fastp_task
-
-        map_reads_task = dsl.task(
-            key=f"map_reads.{sample_pair_name}"
-        ).inputs(
-            index_genome_task.outputs.i1,
-            index_genome_task.outputs.i2,
-            index_genome_task.outputs.i3,
-            index_genome_task.outputs.i4,
-            index_genome_task.outputs.i5,
-            genome_fasta=index_genome_task.outputs.local_genome_fasta,
-            r1=fastp_task.outputs.fastp_out1,
-            r2=fastp_task.outputs.fastp_out2,
-            normalization_value=conf.norm_value,
-            read_len_threshold=conf.read_len_threshold,
-            score_threshold=conf.score_threshold,
-            genome_features=dsl.file(conf.genome_features),
-            mappable_features=dsl.file(conf.mappability),
-            sam2site_basename=f"{sample_pair_name}.q30"
-        ).outputs(
-            mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
-            flagstat=dsl.file(f"{sample_pair_name}_flagstat.txt"),
-            q30_sam=dsl.file(f"{sample_pair_name}.q30.sam"),
-
-            # same2sites.py
-            same2sites_bed=dsl.file(f"{sample_pair_name}.bed"),
-            same2sites_scored_bed=dsl.file(f"{sample_pair_name}_scored.bed"),
-            same2sites_stranded_bedgraph=dsl.file(f"{sample_pair_name}_stranded.bg"),
-            same2sites_unstranded_bedgraph=dsl.file(f"{sample_pair_name}_unstranded.bg"),
-            same2sites_stranded_unnormalized_bedgraph=dsl.file(f"{sample_pair_name}_stranded_unnormalized.bg"),
-
-            intersect_bed=dsl.file(f"{sample_pair_name}_allfeat_intersect.bed"),
-            mappable_intersect_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
-            cds_bed=dsl.file(f"{sample_pair_name}_mappable_intersect.bed"),
-            genes_insertions_tsv=dsl.file(f"{sample_pair_name}_genes_insertions.tsv")
-        ).calls("""
+        """).calls("""
             #!/usr/bin/bash
 
             set -e
@@ -217,7 +209,7 @@ def dag_gen(dsl):
             module use $MUGQIC_INSTALL_HOME/modulefiles            
             module add mugqic/bwa/0.7.17        
             
-            bwa mem -k 10 -t 24 $genome_fasta $r1 $r2 -o $mapped_sam        
+            bwa mem -k 10 -t 24 $genome_fasta $fastp_out1 $fastp_out2 -o $mapped_sam        
             
             module add mugqic/samtools/1.14
 
@@ -264,7 +256,15 @@ def dag_gen(dsl):
             """
         )()
 
-        yield map_reads_task
+    """
+    for match in dsl.query_all_or_nothing("map_reads.*", state="ready"):
+        yield dsl.task(
+            key=f"array_parent",
+            task_conf=self.task_conf()
+        ).slurm_array_parent(
+            children_tasks=match.tasks
+        )()
+    """
 
     for _ in dsl.query_all_or_nothing("map_reads.*"):
         yield dsl.task(

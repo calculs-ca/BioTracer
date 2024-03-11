@@ -88,7 +88,7 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 
 ### Execute single task, --wait --tail
 
-+ option "--wait" launches in the foreground, 
++ option "--wait" launches the task in the foreground 
 + option "--tail" tails the task logs:  out.log (stdout and stderr), and pipeline.log
 + option "--tail-all" tails the task logs:  out.log (stdout and stderr), and pipeline.log to STDOUT
 
@@ -96,5 +96,15 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 
 
 python3 -m dry_pipe.cli task $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail-all         
+
+```
+
+# Run Example:
+
+```bash 
+
+mkdir <the_example_instance_dir>
+
+cp BioTracer/example-config.yml <the_example_instance_dir>          
 
 ```

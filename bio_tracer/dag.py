@@ -1,19 +1,11 @@
+import glob
 import os.path
 from itertools import groupby
+import yaml
 
 from bio_tracer.sam2sites import sam2sites
 from bio_tracer.sites2genes import sites2genes
 from dry_pipe import TaskConf
-
-adapter_seq = 'ACTGTCTCTTATACACATCT'
-
-genome_fasta = '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_KAN_pFG051.fa'
-genome_features = '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_features.bed'
-mappable_features = '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_mappable_features.bed'
-
-samples = [
-    'RK1723_20231106_R00_R1.fastq.gz', 'RK1723_20231106_R00_R2.fastq.gz'
-]
 
 
 task_conf = TaskConf(
@@ -25,6 +17,39 @@ task_conf = TaskConf(
     #python_bin="/home/maxl/miniconda3/envs/Genomics/bin/python"
 )
 
+class Conf:
+    def __init__(self, pipeline_instance_dir):
+        def get_conf_file():
+            for f in glob.glob(os.path.join(pipeline_instance_dir, "*config.yaml")):
+                return f
+            raise Exception(f"config file not found in {pipeline_instance_dir}")
+
+        self.file = get_conf_file()
+        with open(self.file) as fi:
+            self.d = yaml.safe_load(fi)
+
+        self.validate()
+
+    def validate(self):
+        for f in [self.genome_fasta, self.genome_features, self.mappability]:
+            if not os.path.exists(f):
+                raise Exception(f"file {f}, does not exist")
+
+    def __getattr__(self, key):
+
+        if key not in self.d:
+            raise Exception(f"{key} not found in {self.file}")
+
+        return self.d[key]
+
+
+    def samples_list(self):
+
+        samples = list(glob.glob(self.samples))
+        if len(samples) == 0:
+            raise Exception(f"no samples found with {self.samples}")
+
+        return samples
 
 
 def name_and_read_number_from_filename(f):
@@ -45,8 +70,9 @@ def name_and_read_number_from_filename(f):
 
 def pair_samples(files):
 
-    for _, pair in groupby(sorted(files), key=lambda f: name_and_read_number_from_filename(f)[0]):
-
+    for _, pair in groupby(
+        sorted(files), key=lambda f: name_and_read_number_from_filename(f)[0]
+    ):
         read1, read2 = sorted(list(pair), key=lambda f: name_and_read_number_from_filename(f)[1])
         yield read1, read2
 
@@ -54,12 +80,16 @@ def pair_samples(files):
 
 def dag_gen(dsl):
 
-    genome_fasta_basename = os.path.basename(genome_fasta)
+    conf = Conf(dsl.pipeline_instance_dir())
+
+    samples = conf.samples_list()
+
+    genome_fasta_basename = os.path.basename(conf.genome_fasta)
 
     index_genome_task = dsl.task(
         key="index_genome"
     ).inputs(
-        genome_fasta=dsl.file(genome_fasta)
+        genome_fasta=dsl.file(conf.genome_fasta)
     ).outputs(
         local_genome_fasta=dsl.file(genome_fasta_basename),
         i1=dsl.file(f'{genome_fasta_basename}.amb'),
@@ -82,16 +112,19 @@ def dag_gen(dsl):
 
     yield index_genome_task
 
+
     for read_fastq_1, read_fastq_2 in pair_samples(samples):
 
         sample_pair_name = name_and_read_number_from_filename(read_fastq_1)[0]
+
+        sample_pair_name = os.path.basename(sample_pair_name)
 
         fastp_task = dsl.task(
             key=f"fastp.{sample_pair_name}"
         ).inputs(
             read1=dsl.file(read_fastq_1),
             read2=dsl.file(read_fastq_2),
-            adapter_seq=adapter_seq
+            adapter_seq=conf.adapter_seq
         ).outputs(
             fast_qc=dsl.file(f"{sample_pair_name}.fast_qc.zip"),
             cutadapt_r1=dsl.file(f"{sample_pair_name}_R1_cutadapt.fq"),
@@ -153,11 +186,11 @@ def dag_gen(dsl):
             genome_fasta=index_genome_task.outputs.local_genome_fasta,
             r1=fastp_task.outputs.fastp_out1,
             r2=fastp_task.outputs.fastp_out2,
-            normalization_value=10000000,
-            read_len_threshold=20,
-            score_threshold=1,
-            genome_features=dsl.file(genome_features),
-            mappable_features=dsl.file(mappable_features),
+            normalization_value=conf.norm_value,
+            read_len_threshold=conf.read_len_threshold,
+            score_threshold=conf.score_threshold,
+            genome_features=dsl.file(conf.genome_features),
+            mappable_features=dsl.file(conf.mappability),
             sam2site_basename=f"{sample_pair_name}.q30"
         ).outputs(
             mapped_sam=dsl.file(f"mapped_{sample_pair_name}.sam"),
@@ -254,6 +287,6 @@ def dag_gen(dsl):
 
 if __name__ == '__main__':
 
-    for read_fastq_1, read_fastq_2 in pair_samples(samples):
+    for read_fastq_1, read_fastq_2 in pair_samples(Conf("home/maxl/bt").samples_list()):
         sample_pair_name = name_and_read_number_from_filename(read_fastq_1)[0]
         print(f"sample_pair_name: {sample_pair_name}")

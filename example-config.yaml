@@ -8,7 +8,7 @@ norm_value: 10000000
 read_len_threshold: 20
 score_threshold: 1
 
-samples: "/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/RK1723_20231106_R00_R*"
+samples: "/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/*.fastq.gz"
 
 #create_scored_bedfile: True
 #create_stranded_bedgraph: True

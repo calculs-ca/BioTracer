@@ -95,7 +95,6 @@ def dag_gen(dsl):
             f"--mem=30G --cpus-per-task=24"
         ],
         extra_env={
-            "CONDA_HOME": conda_home,
             "BIO_TRACER_HOME": mandatory_env_var("BIO_TRACER_HOME"),
             "DRYPIPE_HOME": mandatory_env_var("DRYPIPE_HOME"),
             "PYTHONPATH": ":".join([
@@ -193,16 +192,22 @@ def dag_gen(dsl):
             genes_insertions_tsv=dsl.file(f"{sample_pair_name}_genes_insertions.tsv")
         ).calls("""
             #!/usr/bin/bash
-            set -xe                 
-            module add fastqc/0.11.9            
+            set -xe
+                             
+            export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+            module use $MUGQIC_INSTALL_HOME/modulefiles            
+            module add fastqc/0.11.9
+                        
             fastqc $read1 $read2 -t 24 -o $__task_output_dir
         """).calls("""
             #!/usr/bin/bash
             set -xe                 
                         
-            cutadapt_cmd=$CONDA_HOME/envs/BioTracerEnv/bin/cutadapt
+            export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
+            module use $MUGQIC_INSTALL_HOME/modulefiles            
+            module add mugqic/cutadapt/2.10
                         
-            $cutadapt_cmd --adapter $adapter_seq -A $adapter_seq --minimum-length 5 --cores 4 \\
+            cutadapt --adapter $adapter_seq -A $adapter_seq --minimum-length 5 --cores 23 \\
               --output $cutadapt_r1 \\
               --paired-output $cutadapt_r2 \\
               $read1 $read2
@@ -219,7 +224,7 @@ def dag_gen(dsl):
                 --cut_right_window_size 4 \\
                 --cut_mean_quality 20 \\
                 --length_required 10 \\
-                -w 24 \\
+                -w 16 \\
                 -i $read1 -o $fastp_out1 \\
                 -I $read2 -O $fastp_out2 \\
                 -j $fastp_json_out -h $fastp_html_out \\
@@ -304,7 +309,7 @@ def dag_gen(dsl):
             
             set -xe            
             
-            multiqc -o $__task_output_dir $__pipeline_instance_dir/output/fastp.*/*.zip $__pipeline_instance_dir/output/fastp.*/*.json $__pipeline_instance_dir/output/map_reads.*/*flagstat.*
+            multiqc -o $__task_output_dir $__pipeline_instance_dir/output/fastq2essentiality.*/*.zip $__pipeline_instance_dir/output/fastq2essentiality.*/*.json $__pipeline_instance_dir/output/fastq2essentiality.*/*flagstat.*
             
             # multiqc breaks python3, causes a DryPipe bug
             module unload mugqic/MultiQC/1.14                

@@ -59,17 +59,7 @@ To run a given pipeline, create a dir for the pipeline instance <PIPELINE_INSTAN
 source BioTracer/env.sh <PIPELINE_INSTANCE_DIR>
 ```
 
-### Prepare pipeline instance:
-
-copy fastas into the pipeline instance directory: 
-
-```bash 
-cp *.fasta.gz <PIPELINE_INSTANCE_DIR>
-
-```
-
-
-### Run
+### Run the pipeline
 
 ```bash 
 
@@ -92,14 +82,6 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 + option "--tail" tails the task logs:  out.log (stdout and stderr), and pipeline.log
 + option "--tail-all" tails the task logs:  out.log (stdout and stderr), and pipeline.log to STDOUT
 
-### Run complete pipeline
-
-```bash 
-
-
-python3 -m dry_pipe.cli run $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail-all         
-
-```
 
 ### Relaunch failed tasks in array
 

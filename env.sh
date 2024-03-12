@@ -1,4 +1,4 @@
-
+#!/usr/bin/bash
 
 # Adjust the following vars
 CONDA_HOME=/nfs3_ib/nfs-ip34/home/maxl/miniconda3

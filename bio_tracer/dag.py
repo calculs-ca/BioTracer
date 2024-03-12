@@ -8,14 +8,17 @@ from bio_tracer.sites2genes import sites2genes
 from dry_pipe import TaskConf
 
 
+def mandatory_env_var(env_var):
+    if env_var not in os.environ:
+        raise Exception(f"Environment variable {env_var} must be set")
+
+    return os.environ[env_var]
+
+
 task_conf = TaskConf(
-    executer_type="process",
-    extra_env={
-        "MUGQIC_INSTALL_HOME": "/cvmfs/soft.mugqic/CentOS6"
-    }
-    # implicit:
-    #python_bin="/home/maxl/miniconda3/envs/Genomics/bin/python"
+    executer_type="process"
 )
+
 
 class Conf:
     def __init__(self, pipeline_instance_dir):
@@ -82,6 +85,27 @@ def dag_gen(dsl):
 
     conf = Conf(dsl.pipeline_instance_dir())
 
+    conda_home = mandatory_env_var("CONDA_HOME")
+
+    slurm_task_conf = TaskConf(
+        executer_type="slurm",
+        slurm_account="def-jacquesp",
+        sbatch_options=[
+            f"--time=2:00:00",
+            f"--mem=30G --cpus-per-task=24"
+        ],
+        extra_env={
+            "CONDA_HOME": conda_home,
+            "BIO_TRACER_HOME": mandatory_env_var("BIO_TRACER_HOME"),
+            "DRYPIPE_HOME": mandatory_env_var("DRYPIPE_HOME"),
+            "PYTHONPATH": ":".join([
+                mandatory_env_var("BIO_TRACER_HOME"),
+                mandatory_env_var("DRYPIPE_HOME")
+            ])
+        },
+        python_bin=f"{conda_home}/envs/BioTracerEnv/bin/python"
+    )
+
     samples = conf.samples_list()
 
     genome_fasta_basename = os.path.basename(conf.genome_fasta)
@@ -120,7 +144,9 @@ def dag_gen(dsl):
         sample_pair_name = os.path.basename(sample_pair_name)
 
         yield dsl.task(
-            key=f"fastq2essentiality.{sample_pair_name}"
+            key=f"fastq2essentiality.{sample_pair_name}",
+            is_slurm_array_child=True,
+            task_conf=slurm_task_conf
         ).inputs(
             index_genome_task.outputs.i1,
             index_genome_task.outputs.i2,
@@ -173,11 +199,10 @@ def dag_gen(dsl):
         """).calls("""
             #!/usr/bin/bash
             set -xe                 
-
-            export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6
-            module use $MUGQIC_INSTALL_HOME/modulefiles
                         
-            cutadapt --adapter $adapter_seq -A $adapter_seq --minimum-length 5 --cores 4 \\
+            cutadapt_cmd=$CONDA_HOME/envs/BioTracerEnv/bin/cutadapt
+                        
+            $cutadapt_cmd --adapter $adapter_seq -A $adapter_seq --minimum-length 5 --cores 4 \\
               --output $cutadapt_r1 \\
               --paired-output $cutadapt_r2 \\
               $read1 $read2
@@ -256,17 +281,17 @@ def dag_gen(dsl):
             """
         )()
 
-    """
-    for match in dsl.query_all_or_nothing("map_reads.*", state="ready"):
+
+    for match in dsl.query_all_or_nothing("fastq2essentiality.*", state="ready"):
         yield dsl.task(
             key=f"array_parent",
-            task_conf=self.task_conf()
+            task_conf=slurm_task_conf
         ).slurm_array_parent(
             children_tasks=match.tasks
         )()
-    """
 
-    for _ in dsl.query_all_or_nothing("map_reads.*"):
+
+    for _ in dsl.query_all_or_nothing("fastq2essentiality.*", state="completed"):
         yield dsl.task(
             key="multiqc"
         ).calls("""

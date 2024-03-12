@@ -1,14 +1,14 @@
 ---
 smpl_amnt: 3
-genome_fasta:    '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_KAN_pFG051.fa'
-genome_features: '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_features.bed'
-mappability:     '/acl/jacquesp-rodrigu1/Snakemake2Drypipe/2_References/BW25113_mappable_features.bed'
+genome_fasta:    '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_KAN_pFG051.fa'
+genome_features: '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_features.bed'
+mappability:     '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_mappable_features.bed'
 adapter_seq : 'ACTGTCTCTTATACACATCT'
 norm_value: 10000000
 read_len_threshold: 20
 score_threshold: 1
 
-samples: "/acl/jacquesp-rodrigu1/Snakemake2Drypipe/3_Samples/RK1723_20231106_R00_R*"
+samples: "/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/RK1723_20231106_R00_R*"
 
 #create_scored_bedfile: True
 #create_stranded_bedgraph: True

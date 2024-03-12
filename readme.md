@@ -92,11 +92,21 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 + option "--tail" tails the task logs:  out.log (stdout and stderr), and pipeline.log
 + option "--tail-all" tails the task logs:  out.log (stdout and stderr), and pipeline.log to STDOUT
 
+### Run complete pipeline
+
 ```bash 
 
 
-python3 -m dry_pipe.cli task $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail-all         
+python3 -m dry_pipe.cli run $PIPELINE_INSTANCE_DIR/.drypipe/fastp.RK1723_20231106_R00 --wait --tail-all         
 
+```
+
+### Relaunch failed tasks in array
+
+```bash 
+
+
+python3 -m dry_pipe.cli restart-failed-array-tasks --task-key=array_parent
 ```
 
 # Run Example:

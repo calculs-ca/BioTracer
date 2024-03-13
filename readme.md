@@ -16,8 +16,8 @@ git clone git@github.com:calculs-ca/BioTracer.git
 git clone git@github.com:calculs-ca/DryPipe.git
 
 cd DryPipe
-git fetch origin wip-dsl-overhaul
-git checkout wip-dsl-overhaul
+git fetch origin 0.10.0
+git checkout 0.10.0
 ```
 
 ### 4. create conda env

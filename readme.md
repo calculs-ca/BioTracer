@@ -66,6 +66,9 @@ source BioTracer/env.sh <PIPELINE_INSTANCE_DIR>
 python3 -m dry_pipe.cli run --generator=bio_tracer:pipeline
 ```
 
+When tasks fail, they can be run individualy. 
+
+
 ### Prepare Tasks
 
 will create tasks, without executing

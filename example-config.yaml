@@ -8,6 +8,9 @@ norm_value: 10000000
 read_len_threshold: 20
 score_threshold: 1
 
+slurm_account: 'def-jacquesp'
+sbatch_options: '--time=2:00:00 --mem=30G --cpus-per-task=24'
+
 samples: "/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/*.fastq.gz"
 
 #create_scored_bedfile: True

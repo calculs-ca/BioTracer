@@ -89,11 +89,8 @@ def dag_gen(dsl):
 
     slurm_task_conf = TaskConf(
         executer_type="slurm",
-        slurm_account="def-jacquesp",
-        sbatch_options=[
-            f"--time=2:00:00",
-            f"--mem=30G --cpus-per-task=24"
-        ],
+        slurm_account=conf.slurm_account,
+        sbatch_options=conf.sbatch_options,
         extra_env={
             "BIO_TRACER_HOME": mandatory_env_var("BIO_TRACER_HOME"),
             "DRYPIPE_HOME": mandatory_env_var("DRYPIPE_HOME"),

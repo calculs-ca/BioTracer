@@ -85,7 +85,7 @@ def dag_gen(dsl):
 
     conf = Conf(dsl.pipeline_instance_dir())
 
-    conda_home = mandatory_env_var("CONDA_HOME")
+    conda_home = mandatory_env_var("CONDA_MYHOME")
 
     slurm_task_conf = TaskConf(
         executer_type="slurm",

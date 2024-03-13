@@ -68,7 +68,7 @@ python3 -m dry_pipe.cli run --generator=bio_tracer:pipeline
 
 When tasks fail, they can be run individualy. 
 
-## DEBUGGING tasks
+# DEBUGGING
 
 ### Prepare Tasks
 

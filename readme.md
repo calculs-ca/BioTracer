@@ -59,11 +59,26 @@ To run a given pipeline, create a dir for the pipeline instance <PIPELINE_INSTAN
 source BioTracer/env.sh <PIPELINE_INSTANCE_DIR>
 ```
 
+# Run with test data to test installation:
+
+```bash 
+
+cd ${BIO_TRACER_HOME}
+unzip bio-tracer-example.zip
+cp example-config.yml <PIPELINE_INSTANCE_DIR>/config.yaml
+# edit the config.yaml accordingly
+
+# run to test install
+
+
+```
+
 ### Run the pipeline
 
 ```bash 
 
 python3 -m dry_pipe.cli run --generator=bio_tracer:pipeline
+
 ```
 
 When tasks fail, they can be run individualy. 
@@ -95,12 +110,4 @@ python3 -m dry_pipe.cli prepare --generator=bio_tracer:pipeline
 python3 -m dry_pipe.cli restart-failed-array-tasks --task-key=array_parent
 ```
 
-# Run Example:
 
-```bash 
-
-mkdir <the_example_instance_dir>
-
-cp BioTracer/example-config.yml <the_example_instance_dir>          
-
-```

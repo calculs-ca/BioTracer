@@ -1,8 +1,8 @@
 ---
 smpl_amnt: 3
-genome_fasta:    '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_KAN_pFG051.fa'
-genome_features: '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_features.bed'
-mappability:     '/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/BW25113_mappable_features.bed'
+genome_fasta:    '/nfs3_ib/nfs-ip34/<Location of BioTracer repo clone>/bio-tracer-example/BW25113_KAN_pFG051.fa'
+genome_features: '/nfs3_ib/nfs-ip34/<Location of BioTracer repo clone>/bio-tracer-example/BW25113_features.bed'
+mappability:     '/nfs3_ib/nfs-ip34/<Location of BioTracer repo clone>/bio-tracer-example/BW25113_mappable_features.bed'
 adapter_seq : 'ACTGTCTCTTATACACATCT'
 norm_value: 10000000
 read_len_threshold: 20
@@ -11,8 +11,4 @@ score_threshold: 1
 slurm_account: 'def-jacquesp'
 sbatch_options: '--time=2:00:00 --mem=30G --cpus-per-task=24'
 
-samples: "/nfs3_ib/nfs-ip34/home/maxl/bio-tracer-example/*.fastq.gz"
-
-#create_scored_bedfile: True
-#create_stranded_bedgraph: True
-#create_unstranded_bedgraph: True
+samples: "/nfs3_ib/nfs-ip34/<Location of BioTracer repo clone>/bio-tracer-example/*.fastq.gz"

@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 # Adjust the following vars
-CONDA_HOME=/nfs3_ib/nfs-ip34/home/maxl/miniconda3
-BIO_TRACER_HOME=/nfs3_ib/nfs-ip34/home/maxl/BioTracer
-DRYPIPE_HOME=/nfs3_ib/nfs-ip34/home/maxl/BioTracer/DryPipe
+export CONDA_MYHOME=/nfs3_ib/nfs-ip34/home/maxl/miniconda3
+export BIO_TRACER_HOME=/nfs3_ib/nfs-ip34/home/maxl/BioTracer
+export DRYPIPE_HOME=/nfs3_ib/nfs-ip34/home/maxl/BioTracer/DryPipe
 
 
 conda activate BioTracerEnv

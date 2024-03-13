@@ -283,14 +283,14 @@ def dag_gen(dsl):
             """
         )()
 
-
-    for match in dsl.query_all_or_nothing("fastq2essentiality.*", state="ready"):
-        yield dsl.task(
-            key=f"array_parent",
-            task_conf=slurm_task_conf
-        ).slurm_array_parent(
-            children_tasks=match.tasks
-        )()
+    for _ in dsl.query_all_or_nothing("index_genome", state="completed"):
+        for match in dsl.query_all_or_nothing("fastq2essentiality.*", state="ready"):
+            yield dsl.task(
+                key=f"array_parent",
+                task_conf=slurm_task_conf
+            ).slurm_array_parent(
+                children_tasks=match.tasks
+            )()
 
 
     for _ in dsl.query_all_or_nothing("fastq2essentiality.*", state="completed"):

@@ -47,7 +47,7 @@ cp <Location of BioTracer repo clone>/env.sh <Location of BioTracer repo clone>/
 ### Initialize shell:
 
 To run a given pipeline, create a dir for the pipeline instance <PIPELINE_INSTANCE_DIR>. **You need to provide full path 
-to instance directory including nf anchor for acces within compute nodes.** Set the environment with: 
+to instance directory including NFS mount path for access within compute nodes.** Set the environment with: 
 
 ```bash 
 source <Location of BioTracer repo clone>/myenv.sh <PIPELINE_INSTANCE_DIR_FULLPATH>
